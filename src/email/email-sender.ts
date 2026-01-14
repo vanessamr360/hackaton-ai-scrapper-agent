@@ -16,16 +16,18 @@ export interface EmailSendResult {
  * @param anunciosCount Número de anúncios encontrados
  * @param mode Modo de execução ('IA' ou 'Manual')
  * @param startTime Data/hora de início da execução
+ * @param customRecipients Lista personalizada de destinatários (opcional, usa EMAIL_RECIPIENTS se não fornecido)
  */
 export async function sendScrapingEmail(
   excelBuffer: Buffer | null,
   fileName: string,
   anunciosCount: number,
   mode: string,
-  startTime: Date
+  startTime: Date,
+  customRecipients?: string[]
 ): Promise<EmailSendResult> {
   const emailService = createEmailServiceFromEnv();
-  const recipients = getEmailRecipients();
+  const recipients = customRecipients && customRecipients.length > 0 ? customRecipients : getEmailRecipients();
 
   // Verificar se o envio de email está configurado
   if (!emailService) {

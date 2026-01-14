@@ -584,7 +584,7 @@
             </div>
 
             <div class="form-group">
-              <label for="maxResults">Máximo de Resultados</label>
+              <label for="maxResults">Máximo de Resultados para procurar</label>
               <input type="number" id="maxResults" min="1" placeholder="Sem limite" />
             </div>
 
@@ -617,6 +617,14 @@
               </div>
               <small style="color: var(--muted); font-size: 0.8rem; display: block; margin-top: 5px">
                 Ativar para enviar email com os resultados
+              </small>
+            </div>
+
+            <div class="form-group" id="emailInputGroup" style="display: none">
+              <label for="emailAddresses">Endereços de Email (separados por vírgula)</label>
+              <input type="text" id="emailAddresses" placeholder="email1@exemplo.com, email2@exemplo.com" />
+              <small style="color: var(--muted); font-size: 0.8rem; display: block; margin-top: 5px">
+                Deixar vazio para usar emails padrão do ambiente
               </small>
             </div>
 
@@ -702,6 +710,8 @@
       const apiUrlInput = document.getElementById('apiUrl');
       const searchDateInput = document.getElementById('searchDate');
       const maxResultsInput = document.getElementById('maxResults');
+      const emailAddressesInput = document.getElementById('emailAddresses');
+      const emailInputGroup = document.getElementById('emailInputGroup');
       const multiselectHeader = document.getElementById('multiselectHeader');
       const multiselectDropdown = document.getElementById('multiselectDropdown');
       const multiselectText = document.getElementById('multiselectText');
@@ -854,6 +864,7 @@
           sendEmailEnabled = !sendEmailEnabled;
           emailToggle.classList.toggle('active');
           emailToggleLabel.textContent = sendEmailEnabled ? '✉️ Email ativado' : 'Email desativado';
+          emailInputGroup.style.display = sendEmailEnabled ? 'block' : 'none';
         });
 
         // Multiselect toggle
@@ -958,6 +969,23 @@
           requestBody.sendEmail = sendEmailEnabled;
           if (sendEmailEnabled) {
             addLog('✉️ Envio de email: ATIVADO', 'warning');
+
+            // Add emails if provided
+            if (emailAddressesInput.value.trim()) {
+              const emails = emailAddressesInput.value
+                .split(',')
+                .map((email) => email.trim())
+                .filter((email) => email.length > 0);
+
+              if (emails.length > 0) {
+                requestBody.emails = emails;
+                addLog(`📧 Destinatários: ${emails.join(', ')}`, 'info');
+              } else {
+                addLog('📧 A usar emails padrão do ambiente', 'info');
+              }
+            } else {
+              addLog('📧 A usar emails padrão do ambiente', 'info');
+            }
           } else {
             addLog('✉️ Envio de email: desativado', 'info');
           }

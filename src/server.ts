@@ -136,6 +136,7 @@ app.get('/api/contracts/yesterday', async (req: Request, res: Response) => {
  *   cpvCodes?: string[],
  *   date?: string (formato YYYY-MM-DD),
  *   sendEmail?: boolean,
+ *   emails?: string[],
  *   maxResults?: number
  * }
  */
@@ -145,7 +146,7 @@ app.post('/api/contracts/search', async (req: Request, res: Response) => {
 
   try {
     // Obter parâmetros do body
-    const { cpvCodes, date, sendEmail, maxResults } = req.body;
+    const { cpvCodes, date, sendEmail, emails, maxResults } = req.body;
 
     // Validar date (deve ser YYYY-MM-DD)
     let targetDate = date || getYesterdayDate();
@@ -233,10 +234,12 @@ app.post('/api/contracts/search', async (req: Request, res: Response) => {
 
     if (sendEmail === true) {
       console.log('Enviando email...');
-      const emailResult = await sendScrapingEmail(excelBuffer, fileName, anuncios.length, useAI ? 'IA' : 'Manual', new Date());
+      // Use provided emails or default from env
+      const targetEmails = emails && emails.length > 0 ? emails : getEmailRecipients();
+      const emailResult = await sendScrapingEmail(excelBuffer, fileName, anuncios.length, useAI ? 'IA' : 'Manual', new Date(), targetEmails);
 
       emailSuccess = emailResult.sent;
-      emailSendTo = emailResult.sent ? getEmailRecipients() : [];
+      emailSendTo = emailResult.sent ? targetEmails : [];
 
       if (emailSuccess) {
         console.log(`Email enviado para ${emailSendTo.length} destinatário(s)`);
