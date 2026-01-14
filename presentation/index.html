@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DDR Scraper - API Test Interface</title>
+    <style>
+      :root {
+        --font-display: 'Segoe UI', Arial, sans-serif;
+        --font-body: 'Segoe UI', Arial, sans-serif;
+
+        --bg: #0a0e27;
+        --surface: rgba(18, 23, 53, 0.92);
+        --card: rgba(22, 28, 63, 0.92);
+        --border: rgba(224, 231, 255, 0.12);
+
+        --text: #ffffff;
+        --text2: #e0e7ff;
+        --muted: #a5afc7;
+
+        --primary: #00d9ff;
+        --accent: #ff6b35;
+        --success: #4ade80;
+        --warning: #f59e0b;
+        --error: #ef4444;
+
+        --shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        --radius: 14px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: var(--font-body);
+        color: var(--text);
+        background: radial-gradient(1200px 700px at 18% 10%, rgba(0, 217, 255, 0.18), transparent 60%),
+          radial-gradient(900px 600px at 88% 18%, rgba(255, 107, 53, 0.16), transparent 55%),
+          radial-gradient(900px 700px at 70% 92%, rgba(74, 222, 128, 0.12), transparent 55%), var(--bg);
+        overflow: hidden;
+        user-select: text;
+        -webkit-user-select: text;
+      }
+
+      /* Auto-ajuste (responsivo) */
+      .deck {
+        width: 100vw;
+        height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: clamp(14px, 2.5vw, 28px);
+        position: relative;
+      }
+
+      .slide {
+        width: min(1180px, 94vw);
+        height: min(660px, 88vh);
+        background: linear-gradient(135deg, var(--surface), rgba(10, 14, 39, 0.88));
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        display: none;
+        position: relative;
+      }
+      .slide.active {
+        display: flex;
+      }
+
+      .slide-inner {
+        width: 100%;
+        height: 100%;
+        padding: clamp(22px, 4.6vw, 56px);
+        display: flex;
+        flex-direction: column;
+        gap: clamp(12px, 1.6vw, 16px);
+      }
+
+      .row {
+        display: flex;
+        gap: 16px;
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .center {
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--font-display);
+        letter-spacing: -0.02em;
+        line-height: 1.12;
+      }
+      h1 {
+        font-size: clamp(34px, 5.2vw, 60px);
+      }
+      h2 {
+        font-size: clamp(24px, 3.2vw, 38px);
+      }
+      h3 {
+        font-size: clamp(16px, 2.2vw, 22px);
+        color: var(--text2);
+        opacity: 0.95;
+      }
+      h4 {
+        font-size: 16px;
+        color: var(--text2);
+        opacity: 0.95;
+      }
+
+      p {
+        color: var(--text2);
+        line-height: 1.55;
+      }
+      .muted {
+        color: var(--muted);
+      }
+
+      .kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(0, 217, 255, 0.1);
+        border: 1px solid rgba(0, 217, 255, 0.18);
+        color: var(--text2);
+        font-weight: 700;
+        font-size: 12px;
+        width: fit-content;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 99px;
+        background: var(--primary);
+        box-shadow: 0 0 18px rgba(0, 217, 255, 0.55);
+      }
+
+      .gradient-text {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .card {
+        background: linear-gradient(135deg, var(--card), rgba(26, 31, 58, 0.8));
+        border: 1px solid rgba(224, 231, 255, 0.1);
+        border-radius: var(--radius);
+        padding: 16px 16px;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.32);
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(0, 217, 255, 0.25);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        border: 1px solid rgba(224, 231, 255, 0.12);
+        background: rgba(224, 231, 255, 0.06);
+        color: var(--text2);
+        width: fit-content;
+      }
+      .pill.primary {
+        border-color: rgba(0, 217, 255, 0.24);
+        background: rgba(0, 217, 255, 0.1);
+      }
+      .pill.accent {
+        border-color: rgba(255, 107, 53, 0.28);
+        background: rgba(255, 107, 53, 0.12);
+      }
+      .pill.success {
+        border-color: rgba(74, 222, 128, 0.25);
+        background: rgba(74, 222, 128, 0.1);
+      }
+
+      ul {
+        margin-left: 18px;
+      }
+      li {
+        margin: 8px 0;
+        color: var(--text2);
+        line-height: 1.45;
+      }
+      li b {
+        color: var(--primary);
+        font-weight: 900;
+      }
+
+      .big-number {
+        font-size: clamp(28px, 4.2vw, 44px);
+        font-weight: 900;
+        letter-spacing: -0.02em;
+      }
+
+      .footer {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.34));
+        border-top: 1px solid rgba(224, 231, 255, 0.08);
+        color: var(--muted);
+        font-size: 12px;
+        gap: 12px;
+      }
+      .footer span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* Navigation */
+      .nav {
+        position: absolute;
+        left: clamp(12px, 2.2vw, 24px);
+        right: clamp(12px, 2.2vw, 24px);
+        bottom: clamp(12px, 2.2vw, 18px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 30;
+        pointer-events: none;
+      }
+      .nav .left,
+      .nav .center,
+      .nav .right {
+        pointer-events: auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .btn {
+        appearance: none;
+        border: 1px solid rgba(224, 231, 255, 0.14);
+        background: rgba(18, 23, 53, 0.6);
+        color: var(--text2);
+        padding: 10px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 900;
+        transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        backdrop-filter: blur(10px);
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        border-color: rgba(0, 217, 255, 0.28);
+        background: rgba(26, 31, 58, 0.7);
+      }
+      .btn:active {
+        transform: translateY(0px);
+      }
+
+      .progress {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(224, 231, 255, 0.12);
+        background: rgba(18, 23, 53, 0.52);
+        backdrop-filter: blur(10px);
+        max-width: 44vw;
+        overflow: auto;
+      }
+      .p-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 99px;
+        background: rgba(224, 231, 255, 0.22);
+        cursor: pointer;
+        transition: transform 0.15s ease, background 0.15s ease;
+        flex: 0 0 auto;
+      }
+      .p-dot.active {
+        background: var(--primary);
+        transform: scale(1.15);
+        box-shadow: 0 0 12px rgba(0, 217, 255, 0.45);
+      }
+      .counter {
+        font-size: 12px;
+        color: var(--muted);
+        margin-left: 8px;
+        flex: 0 0 auto;
+      }
+
+      /* Animations */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .slide.active .slide-inner {
+        animation: fadeUp 0.28s ease;
+      }
+
+      /* Modal & Image Slider */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(10, 14, 39, 0.95);
+        backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal-content {
+        position: relative;
+        width: 90vw;
+        max-width: 1000px;
+        max-height: 80vh;
+        background: linear-gradient(135deg, var(--surface), rgba(10, 14, 39, 0.95));
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        padding: 30px;
+        animation: slideUp 0.3s ease;
+      }
+
+      .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 50%;
+        color: var(--text2);
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        z-index: 10;
+      }
+
+      .modal-close:hover {
+        background: var(--error);
+        border-color: var(--error);
+        transform: rotate(90deg);
+      }
+
+      .slider-container {
+        position: relative;
+        width: 100%;
+        height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .slider-image {
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 8px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        display: none;
+        object-fit: contain;
+      }
+
+      .slider-image.active {
+        display: block;
+        animation: fadeIn 0.4s ease;
+      }
+
+      .slider-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 50px;
+        height: 50px;
+        background: rgba(0, 217, 255, 0.2);
+        border: 1px solid var(--primary);
+        border-radius: 50%;
+        color: var(--primary);
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        z-index: 10;
+      }
+
+      .slider-btn:hover {
+        background: var(--primary);
+        color: var(--bg);
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      .slider-btn.prev {
+        left: 20px;
+      }
+
+      .slider-btn.next {
+        right: 20px;
+      }
+
+      .slider-dots {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .slider-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(224, 231, 255, 0.2);
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .slider-dot.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        transform: scale(1.2);
+        box-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
+      }
+
+      .image-caption {
+        text-align: center;
+        color: var(--text2);
+        margin-top: 15px;
+        font-size: 14px;
+      }
+
+      .view-demo-btn {
+        background: linear-gradient(135deg, var(--primary), #0099cc);
+        color: var(--bg);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 14px;
+        margin-top: 10px;
+      }
+
+      .view-demo-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 217, 255, 0.4);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Small tweaks for smaller screens */
+      @media (max-width: 860px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+        .progress {
+          max-width: 56vw;
+        }
+        .modal-content {
+          width: 95vw;
+          padding: 20px;
+        }
+        .slider-container {
+          height: 50vh;
+        }
+        .slider-btn {
+          width: 40px;
+          height: 40px;
+          font-size: 20px;
+        }
+        .slider-btn.prev {
+          left: 10px;
+        }
+        .slider-btn.next {
+          right: 10px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="deck" id="deck">
+      <!-- Fonte: https://diariodarepublica.pt/dr/home [web:7] -->
+      <!-- Alinhamento com desafio: automação + API com relatório (ex.: Excel em base64) [file:1] -->
+
+      <!-- Slide 1 -->
+      <section class="slide active" data-title="Capa">
+        <div class="slide-inner center">
+          <div class="kicker"><span class="dot"></span> Produto • B2B • Automação diária</div>
+          <h1 class="gradient-text">DDR Scraper Agent</h1>
+          <h3>Transforma anúncios públicos em oportunidades prontas a agir</h3>
+          <p class="muted" style="max-width: 900px; margin-top: 10px">
+            Pesquisa, filtra e entrega automaticamente anúncios do Diário da República (Série II) por critérios CPV — com relatório Excel e integração
+            por API.
+          </p>
+          <div class="footer">
+            <span>Fonte de dados: Diário da República</span>
+            <span>Setas/Space para navegar • F para ecrã inteiro</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3 -->
+      <section class="slide" data-title="Problema">
+        <div class="slide-inner">
+          <div class="kicker"><span class="dot"></span> Dor do cliente</div>
+          <h2>O custo escondido do “fazer à mão”</h2>
+          <div class="grid-2" style="margin-top: 8px">
+            <div class="card">
+              <h4>Tempo</h4>
+              <p class="muted" style="margin-top: 10px">Horas a pesquisar, abrir páginas, copiar campos e consolidar informação.</p>
+            </div>
+            <div class="card">
+              <h4>Qualidade</h4>
+              <p class="muted" style="margin-top: 10px">Falhas e inconsistências em dados críticos (CPV, entidade, datas, links).</p>
+            </div>
+            <div class="card">
+              <h4>Escala</h4>
+              <p class="muted" style="margin-top: 10px">Mais setores e CPVs = mais esforço, mais risco, mais custo operacional.</p>
+            </div>
+          </div>
+          <div class="footer">
+            <span>O mercado não espera — a oportunidade caduca rápido.</span>
+            <span class="muted">3/10</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4 -->
+      <section class="slide" data-title="Proposta">
+        <div class="slide-inner">
+          <div class="kicker"><span class="dot"></span> Proposta de valor</div>
+          <h2>De “pesquisa” para “execução”</h2>
+          <div class="card" style="margin-top: 8px">
+            <div class="row" style="justify-content: space-between; align-items: baseline; flex-wrap: wrap">
+              <div>
+                <div class="pill primary">Resultado</div>
+                <p class="muted" style="margin-top: 10px; max-width: 780px">
+                  Entrega diária de anúncios filtrados (por CPV) com relatório Excel e dados estruturados para automação.
+                </p>
+              </div>
+              <div style="text-align: right">
+                <div class="big-number gradient-text">Minutos</div>
+                <div class="muted" style="font-size: 12px">em vez de horas</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-3" style="margin-top: 16px">
+            <div class="card">
+              <div class="pill success">Excel pronto</div>
+              <p class="muted" style="margin-top: 10px">Para equipas tomarem decisão sem fricção.</p>
+            </div>
+            <div class="card">
+              <div class="pill primary">API pronta</div>
+              <p class="muted" style="margin-top: 10px">Para integrar em CRM, alertas e pipelines.</p>
+            </div>
+            <div class="card">
+              <div class="pill accent">Automação contínua</div>
+              <p class="muted" style="margin-top: 10px">Scheduler + email: os dados chegam sem pedir.</p>
+            </div>
+          </div>
+
+          <div class="footer">
+            <span>Entrega por API pode incluir o Excel em base64 (integração rápida). </span>
+            <span class="muted">4/10</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 5 -->
+      <section class="slide" data-title="Produto">
+        <div class="slide-inner">
+          <div class="kicker"><span class="dot"></span> O produto</div>
+          <h2>O que o DDR Scraper Agent faz</h2>
+
+          <div class="grid-2" style="margin-top: 8px">
+            <div class="card">
+              <div class="pill primary">Monitorização por CPV</div>
+              <ul style="margin-top: 10px">
+                <li><b>Seguros</li>
+                <li>Filtragem consistente, sem ruído.</li>
+                <li>Lista “de ontem” como caso padrão (com possibilidade de ajuste).</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <div class="pill success">Entrega</div>
+              <ul style="margin-top: 10px">
+                <li>Email com relatório Excel anexado.</li>
+                <li>API para consumo de sistemas externos e CRM.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="footer">
+            <span>Foco: reduzir fricção na adoção (equipa + sistemas).</span>
+            <span class="muted">5/10</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6 -->
+      <section class="slide" data-title="Como funciona">
+        <div class="slide-inner">
+          <div class="kicker"><span class="dot"></span> Como funciona</div>
+          <h2>Três passos, zero esforço diário</h2>
+
+          <div class="grid-3" style="margin-top: 8px">
+            <div class="card">
+              <div class="pill primary">1) Recolher</div>
+              <p class="muted" style="margin-top: 10px">O agente navega e recolhe os anúncios relevantes no Diário da República.</p>
+            </div>
+            <div class="card">
+              <div class="pill accent">2) Filtrar</div>
+              <p class="muted" style="margin-top: 10px">Filtra por CPV e critérios definidos, garantindo consistência no output.</p>
+            </div>
+            <div class="card">
+              <div class="pill success">3) Entregar</div>
+              <p class="muted" style="margin-top: 10px">Envia Excel por email e disponibiliza dados via API para integrações.</p>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 16px">
+            <div class="row" style="justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px">
+              <div>
+                <div class="pill success">Escalabilidade e Integração Estratégica</div>
+                <p class="muted" style="margin-top: 10px; font-weight: normal;">
+                  Solução escalável e adaptável, preparada para evoluir com o negócio:
+                  <ul>
+                    <li>Integração via API com GestConcursos para sincronizar dados extraídos e apoiar a gestão de contratos públicos.</li>
+                    <li>Capacidade de expansão para novos setores, filtros e plataformas, garantindo flexibilidade e longevidade.</li>
+                  </ul>
+                </p>
+              </div>
+              <button class="view-demo-btn" id="viewGestConcursosBtn" style="margin-top:0px;background: linear-gradient(135deg, var(--success), #2a9d50); padding: 8px 16px; font-size: 12px;">📊 Ver GestConcursos</button>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 50px; margin-top: 16px;flex-wrap: wrap; justify-content: center;">
+            <button class="view-demo-btn" id="viewDemoBtn">🖼️ Ver Screenshots</button>
+            <a href="api-test.html" target="_blank" style="text-decoration: none">
+              <button class="view-demo-btn" style="background: linear-gradient(135deg, var(--accent), #cc4400)">
+                🚀 Testar Demo
+              </button>
+            </a>
+          </div>
+
+          <div class="footer">
+            <span>Alta previsibilidade para negócio, com automação diária.</span>
+            <span class="muted">6/10</span>
+          </div>
+        </div>
+      </section>
+   
+
+      <!-- Slide 10 -->
+      <section class="slide" data-title="CTA">
+        <div class="slide-inner center">
+          <div class="kicker"><span class="dot"></span> Próximo passo</div>
+          <h2 class="gradient-text">Piloto em 48h</h2>
+          <p class="muted" style="max-width: 900px; margin-top: 10px">
+            Definir CPVs + destinatários de email + formato do Excel/API. Primeira entrega no dia útil seguinte.
+          </p>
+
+          <div class="grid-3" style="margin-top: 18px; width: 100%">
+            <div class="card">
+              <div class="pill primary">Rápido</div>
+              <p class="muted" style="margin-top: 10px">Setup simples, impacto imediato.</p>
+            </div>
+            <div class="card">
+              <div class="pill success">Confiável</div>
+              <p class="muted" style="margin-top: 10px">Processo repetível e auditável.</p>
+            </div>
+            <div class="card">
+              <div class="pill accent">Integrável</div>
+              <p class="muted" style="margin-top: 10px">Excel + API para equipas e sistemas.</p>
+            </div>
+          </div>
+
+          <div class="footer">
+            <span>DDR Scraper Agent • Diário da República</span>
+            <span class="muted">10/10</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- GestConcursos Modal -->
+      <div class="modal-overlay" id="gestConcursosModal">
+        <div class="modal-content">
+          <div class="modal-close" id="closeGestConcursos">×</div>
+          <div style="text-align: center; padding: 20px;">
+            <h2 style="color: var(--text2); margin-bottom: 20px;">GestConcursos - Integração Estratégica</h2>
+            <div style="max-height: 70vh; overflow: auto;">
+              <img src="../images/gestConcursos.png" alt="GestConcursos" style="max-width: 100%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);" />
+            </div>
+            <p class="muted" style="margin-top: 20px; font-size: 14px;">
+              Plataforma de gestão de contratos públicos que se integra com o DDR Scraper Agent
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Slider Modal -->
+      <div class="modal-overlay" id="imageModal">
+        <div class="modal-content">
+          <div class="modal-close" id="closeModal">×</div>
+          <div class="slider-container">
+            <img src="../images/I1.png" alt="Screenshot 1" class="slider-image active" />
+            <img src="../images/I2.png" alt="Screenshot 2" class="slider-image" />
+            <img src="../images/I3.png" alt="Screenshot 3" class="slider-image" />
+            <img src="../images/I4.png" alt="Screenshot 4" class="slider-image" />
+            <img src="../images/I5.1.png" alt="Screenshot 5.1" class="slider-image" />
+            <img src="../images/I5.2.png" alt="Screenshot 5.2" class="slider-image" />
+            <button class="slider-btn prev" id="sliderPrev">‹</button>
+            <button class="slider-btn next" id="sliderNext">›</button>
+          </div>
+          <div class="slider-dots" id="sliderDots"></div>
+          <div class="image-caption" id="imageCaption">1 - Aceder ao site diariodarepublica.pt e clicar em Série II.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="nav">
+        <div class="left">
+          <button class="btn" id="prevBtn" type="button">Anterior</button>
+          <button class="btn" id="nextBtn" type="button">Seguinte</button>
+        </div>
+        <div class="center">
+          <div class="progress" id="progress"></div>
+        </div>
+        <div class="right">
+          <button class="btn" id="fsBtn" type="button">Ecrã inteiro</button>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        const slides = Array.from(document.querySelectorAll('.slide'));
+        const progress = document.getElementById('progress');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const fsBtn = document.getElementById('fsBtn');
+
+        const demoPulseBtn = document.getElementById('demoPulseBtn');
+
+        let idx = slides.findIndex((s) => s.classList.contains('active'));
+        if (idx < 0) idx = 0;
+
+        function renderProgress() {
+          progress.innerHTML = '';
+          slides.forEach((_, i) => {
+            const d = document.createElement('div');
+            d.className = 'p-dot' + (i === idx ? ' active' : '');
+            d.title = slides[i].dataset.title || 'Slide ' + (i + 1);
+            d.addEventListener('click', () => goTo(i));
+            progress.appendChild(d);
+          });
+          const counter = document.createElement('div');
+          counter.className = 'counter';
+          counter.textContent = idx + 1 + '/' + slides.length;
+          progress.appendChild(counter);
+        }
+
+        function goTo(i) {
+          const next = Math.max(0, Math.min(slides.length - 1, i));
+          slides[idx].classList.remove('active');
+          idx = next;
+          slides[idx].classList.add('active');
+          renderProgress();
+        }
+
+        function next() {
+          goTo(idx + 1);
+        }
+        function prev() {
+          goTo(idx - 1);
+        }
+
+        prevBtn.addEventListener('click', prev);
+        nextBtn.addEventListener('click', next);
+
+        document.addEventListener('keydown', (e) => {
+          const key = e.key.toLowerCase();
+          if (key === 'arrowright' || key === ' ' || key === 'pagedown') {
+            e.preventDefault();
+            next();
+          }
+          if (key === 'arrowleft' || key === 'pageup') {
+            e.preventDefault();
+            prev();
+          }
+          if (key === 'home') {
+            e.preventDefault();
+            goTo(0);
+          }
+          if (key === 'end') {
+            e.preventDefault();
+            goTo(slides.length - 1);
+          }
+          if (key === 'f') {
+            toggleFullscreen();
+          }
+        });
+
+        function toggleFullscreen() {
+          const el = document.documentElement;
+          if (!document.fullscreenElement) {
+            if (el.requestFullscreen) el.requestFullscreen();
+          } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+          }
+        }
+        fsBtn.addEventListener('click', toggleFullscreen);
+
+        // Pequena interação “modo demo” (sem detalhes técnicos)
+        if (demoPulseBtn) {
+          demoPulseBtn.addEventListener('click', () => {
+            const cards = slides[idx].querySelectorAll('.card');
+            cards.forEach((c, i) => {
+              c.animate(
+                [
+                  { transform: 'translateY(0px)', boxShadow: '0 10px 26px rgba(0,0,0,0.32)' },
+                  { transform: 'translateY(-6px)', boxShadow: '0 22px 44px rgba(0,0,0,0.45)' },
+                  { transform: 'translateY(0px)', boxShadow: '0 10px 26px rgba(0,0,0,0.32)' },
+                ],
+                { duration: 420 + i * 60, easing: 'ease-out' }
+              );
+            });
+          });
+        }
+
+        renderProgress();
+      })();
+
+      // Image Slider Modal
+      (function() {
+        const modal = document.getElementById('imageModal');
+        const viewDemoBtn = document.getElementById('viewDemoBtn');
+        const closeModal = document.getElementById('closeModal');
+        const sliderPrev = document.getElementById('sliderPrev');
+        const sliderNext = document.getElementById('sliderNext');
+        const sliderDots = document.getElementById('sliderDots');
+        const imageCaption = document.getElementById('imageCaption');
+        const images = Array.from(document.querySelectorAll('.slider-image'));
+        
+        const captions = [
+          '1 - Aceder ao site diariodarepublica.pt e clicar em Série II.',
+          '2 - Selecionar a data desejada no calendário (por defeito seleciona o dia anterior).',
+          '3 - Clicar em Anúncios publicados.',
+          '4 - Percorrer a lista de Anúncios de Procedimento.',
+          '5.1 - Para cada anúncio, extrair o Vocabulário Principal e verificar se corresponde a algum CPV da lista.',
+          '5.2 - Listagem de CPVs monitorizados.'
+        ];
+        
+        let currentSlide = 0;
+
+        function renderDots() {
+          sliderDots.innerHTML = '';
+          images.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'slider-dot' + (i === currentSlide ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            sliderDots.appendChild(dot);
+          });
+        }
+
+        function goToSlide(index) {
+          images[currentSlide].classList.remove('active');
+          currentSlide = index;
+          images[currentSlide].classList.add('active');
+          imageCaption.textContent = captions[currentSlide];
+          renderDots();
+        }
+
+        function nextSlide() {
+          goToSlide((currentSlide + 1) % images.length);
+        }
+
+        function prevSlide() {
+          goToSlide((currentSlide - 1 + images.length) % images.length);
+        }
+
+        if (viewDemoBtn) {
+          viewDemoBtn.addEventListener('click', () => {
+            modal.classList.add('active');
+            goToSlide(0); // Reset to first slide and update caption
+            renderDots();
+          });
+        }
+
+        closeModal.addEventListener('click', () => {
+          modal.classList.remove('active');
+        });
+
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.remove('active');
+          }
+        });
+
+        sliderPrev.addEventListener('click', prevSlide);
+        sliderNext.addEventListener('click', nextSlide);
+
+        document.addEventListener('keydown', (e) => {
+          if (!modal.classList.contains('active')) return;
+          
+          if (e.key === 'ArrowLeft') {
+            e.stopPropagation();
+            prevSlide();
+          }
+          if (e.key === 'ArrowRight') {
+            e.stopPropagation();
+            nextSlide();
+          }
+          if (e.key === 'Escape') {
+            modal.classList.remove('active');
+          }
+        });
+
+        renderDots();
+      })();
+
+      // GestConcursos Modal
+      (function() {
+        const modal = document.getElementById('gestConcursosModal');
+        const viewBtn = document.getElementById('viewGestConcursosBtn');
+        const closeBtn = document.getElementById('closeGestConcursos');
+
+        if (viewBtn) {
+          viewBtn.addEventListener('click', () => {
+            modal.classList.add('active');
+          });
+        }
+
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+          });
+        }
+
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.remove('active');
+          }
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (modal.classList.contains('active') && e.key === 'Escape') {
+            modal.classList.remove('active');
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

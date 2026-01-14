@@ -1,0 +1,41 @@
+{
+  "name": "ddr-scrapper-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p .",
+    "start": "node dist/index.js",
+    "start:api": "node dist/api-server.js",
+    "start:api:v2": "node dist/api-server-simplified.js",
+    "test": "node dist/test.js",
+    "scheduler": "node dist/scheduler-main.js schedule",
+    "scheduler:now": "node dist/scheduler-main.js now",
+    "scheduler:manual": "node dist/scheduler-main.js manual",
+    "test:email": "node dist/email/test-email.js",
+    "test:ai": "node dist/test-ai.js",
+    "test:api": "node dist/test-api.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0",
+    "express": "^4.19.2",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.12",
+    "openai": "^4.53.0",
+    "playwright": "^1.46.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.30",
+    "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^7.0.5",
+    "cross-env": "^7.0.3",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.3"
+  }
+}

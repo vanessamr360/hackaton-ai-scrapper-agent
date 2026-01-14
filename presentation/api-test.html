@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DDR Scraper - API Test Interface</title>
+    <style>
+      :root {
+        --bg: #0a0e27;
+        --surface: rgba(18, 23, 53, 0.95);
+        --card: rgba(22, 28, 63, 0.95);
+        --border: rgba(224, 231, 255, 0.12);
+        --text: #ffffff;
+        --text2: #e0e7ff;
+        --muted: #a5afc7;
+        --primary: #00d9ff;
+        --accent: #ff6b35;
+        --success: #4ade80;
+        --warning: #f59e0b;
+        --error: #ef4444;
+        --shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        --radius: 14px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: var(--text);
+        background: radial-gradient(1200px 700px at 18% 10%, rgba(0, 217, 255, 0.18), transparent 60%),
+          radial-gradient(900px 600px at 88% 18%, rgba(255, 107, 53, 0.16), transparent 55%),
+          radial-gradient(900px 700px at 70% 92%, rgba(74, 222, 128, 0.12), transparent 55%), var(--bg);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        margin-bottom: 2rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .panel {
+        background: linear-gradient(135deg, var(--surface), rgba(10, 14, 39, 0.88));
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        box-shadow: var(--shadow);
+      }
+
+      .panel h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--text2);
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text2);
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      input[type='text'],
+      input[type='date'],
+      input[type='number'] {
+        width: 100%;
+        padding: 10px 12px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      .multiselect-container {
+        position: relative;
+        z-index: 100;
+      }
+
+      .multiselect-header {
+        padding: 10px 12px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: border-color 0.2s ease;
+        user-select: none;
+      }
+
+      .multiselect-header:hover {
+        border-color: var(--primary);
+      }
+
+      .multiselect-header.active {
+        border-color: var(--primary);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      .multiselect-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--card);
+        border: 1px solid var(--primary);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1001;
+        display: none;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      }
+
+      .multiselect-dropdown.active {
+        display: block;
+      }
+
+      .multiselect-dropdown::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .multiselect-dropdown::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .multiselect-dropdown::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 4px;
+      }
+
+      .multiselect-option {
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .multiselect-option:hover {
+        background: rgba(0, 217, 255, 0.1);
+      }
+
+      .multiselect-option input[type='checkbox'] {
+        cursor: pointer;
+      }
+
+      .selected-count {
+        background: var(--primary);
+        color: var(--bg);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, var(--primary), #0099cc);
+        border: none;
+        border-radius: 8px;
+        color: var(--bg);
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 217, 255, 0.4);
+      }
+
+      .btn:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-secondary {
+        background: rgba(255, 107, 53, 0.2);
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        margin-top: 10px;
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        background: rgba(255, 107, 53, 0.3);
+        box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+      }
+
+      .toggle-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 48px;
+        height: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        border: 1px solid var(--border);
+      }
+
+      .toggle-switch.active {
+        background: var(--primary);
+        border-color: var(--primary);
+      }
+
+      .toggle-slider {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 18px;
+        height: 18px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .toggle-switch.active .toggle-slider {
+        transform: translateX(24px);
+      }
+
+      .toggle-label {
+        color: var(--text2);
+        font-weight: 500;
+        user-select: none;
+      }
+
+      .status {
+        margin-top: 1rem;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        display: none;
+      }
+
+      .status.loading {
+        display: block;
+        background: rgba(0, 217, 255, 0.1);
+        border: 1px solid var(--primary);
+        color: var(--primary);
+      }
+
+      .status.success {
+        display: block;
+        background: rgba(74, 222, 128, 0.1);
+        border: 1px solid var(--success);
+        color: var(--success);
+      }
+
+      .status.error {
+        display: block;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid var(--error);
+        color: var(--error);
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid var(--primary);
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 8px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .results-panel {
+        grid-column: 1 / -1;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .tab {
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+
+      .tab:hover {
+        color: var(--text2);
+      }
+
+      .tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .summary-card {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+
+      .summary-card .label {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+      }
+
+      .summary-card .value {
+        color: var(--text);
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .contract-item {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        margin-bottom: 10px;
+        transition: border-color 0.2s ease;
+      }
+
+      .contract-item:hover {
+        border-color: var(--primary);
+      }
+
+      .contract-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 10px;
+      }
+
+      .contract-title {
+        font-weight: 600;
+        color: var(--text);
+        font-size: 1.05rem;
+        flex: 1;
+      }
+
+      .contract-cpv {
+        background: var(--primary);
+        color: var(--bg);
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-left: 10px;
+      }
+
+      .logs-container {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 0.85rem;
+      }
+
+      .logs-container::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .logs-container::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+      }
+
+      .logs-container::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 4px;
+      }
+
+      .log-entry {
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(224, 231, 255, 0.05);
+        color: var(--text2);
+        display: flex;
+        align-items: start;
+        gap: 10px;
+      }
+
+      .log-entry:last-child {
+        border-bottom: none;
+      }
+
+      .log-timestamp {
+        color: var(--muted);
+        font-size: 0.75rem;
+        min-width: 65px;
+      }
+
+      .log-message {
+        flex: 1;
+        word-break: break-word;
+      }
+
+      .log-entry.info .log-message {
+        color: var(--primary);
+      }
+
+      .log-entry.success .log-message {
+        color: var(--success);
+      }
+
+      .log-entry.warning .log-message {
+        color: var(--warning);
+      }
+
+      .log-entry.error .log-message {
+        color: var(--error);
+      }
+
+      .contract-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .contract-meta-item {
+        font-size: 0.85rem;
+      }
+
+      .contract-meta-item .label {
+        color: var(--muted);
+      }
+
+      .contract-meta-item .value {
+        color: var(--text2);
+        font-weight: 600;
+      }
+
+      .contract-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 10px;
+      }
+
+      .contract-link:hover {
+        text-decoration: underline;
+      }
+
+      pre {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 0.85rem;
+        color: var(--text2);
+        border: 1px solid var(--border);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--muted);
+      }
+
+      .empty-state svg {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+        opacity: 0.3;
+      }
+
+      @media (max-width: 1024px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔍 DDR Scraper - API Test Interface</h1>
+      <p class="subtitle">Teste a API de pesquisa de contratos públicos do Diário da República</p>
+
+      <div class="grid">
+        <!-- Form Panel -->
+        <div class="panel">
+          <h2>Parâmetros de Pesquisa</h2>
+
+          <form id="searchForm">
+            <div class="form-group">
+              <label for="apiUrl">URL da API</label>
+              <input type="text" id="apiUrl" value="http://localhost:3000" placeholder="http://localhost:3000" />
+            </div>
+
+            <div class="form-group">
+              <label for="searchDate">Data</label>
+              <input type="date" id="searchDate" />
+              <small style="color: var(--muted); font-size: 0.8rem; display: block; margin-top: 5px"> Deixar vazio para usar data de ontem </small>
+            </div>
+
+            <div class="form-group">
+              <label for="maxResults">Máximo de Resultados</label>
+              <input type="number" id="maxResults" min="1" placeholder="Sem limite" />
+            </div>
+
+            <div class="form-group">
+              <label>Códigos CPV</label>
+              <div class="multiselect-container">
+                <div class="multiselect-header" id="multiselectHeader">
+                  <span id="multiselectText">Selecionar CPVs...</span>
+                  <span class="selected-count" id="selectedCount">0</span>
+                </div>
+                <div class="multiselect-dropdown" id="multiselectDropdown">
+                  <div style="padding: 10px; border-bottom: 1px solid var(--border)">
+                    <input type="text" id="cpvSearch" placeholder="Pesquisar CPV..." style="width: 100%; background: rgba(0, 0, 0, 0.4)" />
+                  </div>
+                  <div id="cpvOptions">
+                    <!-- CPV options will be loaded here -->
+                  </div>
+                </div>
+              </div>
+              <small style="color: var(--muted); font-size: 0.8rem; display: block; margin-top: 5px"> Deixar vazio para usar todos os CPVs </small>
+            </div>
+
+            <div class="form-group">
+              <label>Enviar Email</label>
+              <div class="toggle-container">
+                <div class="toggle-switch" id="emailToggle">
+                  <div class="toggle-slider"></div>
+                </div>
+                <span class="toggle-label" id="emailToggleLabel">Email desativado</span>
+              </div>
+              <small style="color: var(--muted); font-size: 0.8rem; display: block; margin-top: 5px">
+                Ativar para enviar email com os resultados
+              </small>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+              <span id="btnText">🚀 Executar Pesquisa</span>
+            </button>
+
+            <button type="button" class="btn btn-secondary" id="downloadBtn" disabled>📥 Descarregar Excel</button>
+          </form>
+
+          <div class="status" id="status"></div>
+
+          <div id="logsSection" style="display: none">
+            <h3 style="color: var(--text2); margin-top: 20px; margin-bottom: 10px; font-size: 1rem">📋 Logs de Execução</h3>
+            <div class="logs-container" id="logsContainer"></div>
+          </div>
+        </div>
+
+        <!-- API Info Panel -->
+        <div class="panel">
+          <h2>ℹ️ Informações da API</h2>
+          <div style="color: var(--text2); line-height: 1.6">
+            <p style="margin-bottom: 15px">Esta interface permite testar a API <strong>/api/contracts/search</strong> do DDR Scraper Agent.</p>
+
+            <h3 style="color: var(--primary); font-size: 1.1rem; margin: 20px 0 10px 0">Endpoints Disponíveis:</h3>
+            <ul style="margin-left: 20px; color: var(--muted)">
+              <li style="margin-bottom: 8px"><code style="color: var(--primary)">GET /health</code> - Health check</li>
+              <li style="margin-bottom: 8px"><code style="color: var(--primary)">GET /api/contracts/yesterday</code> - Contratos de ontem</li>
+              <li style="margin-bottom: 8px"><code style="color: var(--primary)">POST /api/contracts/search</code> - Pesquisa personalizada</li>
+              <li style="margin-bottom: 8px"><code style="color: var(--primary)">GET /api/cpv-codes</code> - Lista de códigos CPV</li>
+            </ul>
+
+            <h3 style="color: var(--primary); font-size: 1.1rem; margin: 20px 0 10px 0">Como Usar:</h3>
+            <ol style="margin-left: 20px; color: var(--muted)">
+              <li style="margin-bottom: 8px">Selecione a data (ou deixe vazio para ontem)</li>
+              <li style="margin-bottom: 8px">Defina o máximo de resultados (opcional)</li>
+              <li style="margin-bottom: 8px">Selecione os códigos CPV desejados (ou deixe vazio para todos)</li>
+              <li style="margin-bottom: 8px">Clique em "Executar Pesquisa"</li>
+              <li style="margin-bottom: 8px">Visualize os resultados nas abas abaixo</li>
+            </ol>
+
+            <div style="margin-top: 20px; padding: 15px; background: rgba(0, 217, 255, 0.1); border-radius: 8px; border: 1px solid var(--primary)">
+              <strong style="color: var(--primary)">💡 Dica:</strong>
+              <p style="margin-top: 8px; color: var(--text2); font-size: 0.9rem">
+                A pesquisa pode demorar alguns minutos dependendo do número de anúncios. O progresso será mostrado em tempo real.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Panel -->
+      <div class="panel results-panel" id="resultsPanel" style="display: none">
+        <h2>📊 Resultados</h2>
+
+        <div class="summary-grid" id="summaryGrid"></div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="contracts">Contratos</button>
+          <button class="tab" data-tab="json">JSON Completo</button>
+        </div>
+
+        <div class="tab-content active" id="contractsTab">
+          <div id="contractsList"></div>
+        </div>
+
+        <div class="tab-content" id="jsonTab">
+          <pre id="jsonContent"></pre>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // State
+      let cpvCodes = {};
+      let selectedCpvs = new Set();
+      let currentResponse = null;
+      let sendEmailEnabled = false;
+      let logsEnabled = true;
+
+      // DOM Elements
+      const form = document.getElementById('searchForm');
+      const apiUrlInput = document.getElementById('apiUrl');
+      const searchDateInput = document.getElementById('searchDate');
+      const maxResultsInput = document.getElementById('maxResults');
+      const multiselectHeader = document.getElementById('multiselectHeader');
+      const multiselectDropdown = document.getElementById('multiselectDropdown');
+      const multiselectText = document.getElementById('multiselectText');
+      const selectedCount = document.getElementById('selectedCount');
+      const cpvOptions = document.getElementById('cpvOptions');
+      const cpvSearch = document.getElementById('cpvSearch');
+      const emailToggle = document.getElementById('emailToggle');
+      const emailToggleLabel = document.getElementById('emailToggleLabel');
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const status = document.getElementById('status');
+      const resultsPanel = document.getElementById('resultsPanel');
+      const summaryGrid = document.getElementById('summaryGrid');
+      const contractsList = document.getElementById('contractsList');
+      const jsonContent = document.getElementById('jsonContent');
+      const logsSection = document.getElementById('logsSection');
+      const logsContainer = document.getElementById('logsContainer');
+
+      // Initialize
+      async function init() {
+        // Set yesterday's date as default
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        searchDateInput.value = yesterday.toISOString().split('T')[0];
+
+        // Load CPV codes
+        await loadCpvCodes();
+
+        // Setup event listeners
+        setupEventListeners();
+      }
+
+      // Load CPV codes from API
+      async function loadCpvCodes() {
+        try {
+          const response = await fetch(`${apiUrlInput.value}/api/cpv-codes`);
+          const data = await response.json();
+
+          if (data.success) {
+            cpvCodes = data.cpvCodes;
+            renderCpvOptions();
+          }
+        } catch (error) {
+          console.error('Erro ao carregar CPV codes:', error);
+          showStatus('Erro ao carregar códigos CPV. Verifique se a API está a funcionar.', 'error');
+        }
+      }
+
+      // Log functions
+      function addLog(message, type = 'info') {
+        if (!logsEnabled) return;
+
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry ${type}`;
+
+        const timestamp = document.createElement('span');
+        timestamp.className = 'log-timestamp';
+        const now = new Date();
+        timestamp.textContent = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        const messageSpan = document.createElement('span');
+        messageSpan.className = 'log-message';
+        messageSpan.textContent = message;
+
+        logEntry.appendChild(timestamp);
+        logEntry.appendChild(messageSpan);
+        logsContainer.appendChild(logEntry);
+
+        // Auto-scroll to bottom
+        logsContainer.scrollTop = logsContainer.scrollHeight;
+      }
+
+      function clearLogs() {
+        logsContainer.innerHTML = '';
+      }
+
+      function showLogs() {
+        logsSection.style.display = 'block';
+      }
+
+      function hideLogs() {
+        logsSection.style.display = 'none';
+      }
+
+      // Render CPV options
+      function renderCpvOptions(filter = '') {
+        cpvOptions.innerHTML = '';
+
+        const entries = Object.entries(cpvCodes).filter(([code, desc]) => {
+          const searchTerm = filter.toLowerCase();
+          return code.toLowerCase().includes(searchTerm) || desc.toLowerCase().includes(searchTerm);
+        });
+
+        if (entries.length === 0) {
+          cpvOptions.innerHTML = '<div style="padding: 15px; color: var(--muted); text-align: center;">Nenhum CPV encontrado</div>';
+          return;
+        }
+
+        entries.forEach(([code, description]) => {
+          const option = document.createElement('div');
+          option.className = 'multiselect-option';
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.id = `cpv-${code}`;
+          checkbox.value = code;
+          checkbox.checked = selectedCpvs.has(code);
+
+          checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+              selectedCpvs.add(code);
+            } else {
+              selectedCpvs.delete(code);
+            }
+            updateSelectedCount();
+          });
+
+          const label = document.createElement('label');
+          label.htmlFor = `cpv-${code}`;
+          label.style.cursor = 'pointer';
+          label.style.flex = '1';
+          label.innerHTML = `<strong>${code}</strong> - ${description}`;
+
+          option.appendChild(checkbox);
+          option.appendChild(label);
+          cpvOptions.appendChild(option);
+        });
+      }
+
+      // Update selected count
+      function updateSelectedCount() {
+        const count = selectedCpvs.size;
+        selectedCount.textContent = count;
+
+        if (count === 0) {
+          multiselectText.textContent = 'Selecionar CPVs...';
+        } else if (count === 1) {
+          const code = Array.from(selectedCpvs)[0];
+          multiselectText.textContent = `${code} - ${cpvCodes[code]}`;
+        } else {
+          multiselectText.textContent = `${count} CPVs selecionados`;
+        }
+      }
+
+      // Setup event listeners
+      function setupEventListeners() {
+        // Email toggle
+        emailToggle.addEventListener('click', () => {
+          sendEmailEnabled = !sendEmailEnabled;
+          emailToggle.classList.toggle('active');
+          emailToggleLabel.textContent = sendEmailEnabled ? '✉️ Email ativado' : 'Email desativado';
+        });
+
+        // Multiselect toggle
+        multiselectHeader.addEventListener('click', (e) => {
+          e.stopPropagation();
+          multiselectDropdown.classList.toggle('active');
+          multiselectHeader.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.multiselect-container')) {
+            multiselectDropdown.classList.remove('active');
+            multiselectHeader.classList.remove('active');
+          }
+        });
+
+        // CPV search
+        cpvSearch.addEventListener('input', (e) => {
+          renderCpvOptions(e.target.value);
+        });
+
+        // Prevent dropdown close on search click
+        cpvSearch.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+
+        // Form submit
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          await executeSearch();
+        });
+
+        // Download button
+        downloadBtn.addEventListener('click', downloadExcel);
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach((tab) => {
+          tab.addEventListener('click', () => {
+            const tabName = tab.dataset.tab;
+            switchTab(tabName);
+          });
+        });
+      }
+
+      // Switch tabs
+      function switchTab(tabName) {
+        document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('active'));
+
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        document.getElementById(`${tabName}Tab`).classList.add('active');
+      }
+
+      // Show status
+      function showStatus(message, type = 'loading') {
+        status.className = `status ${type}`;
+        status.innerHTML = type === 'loading' ? `<span class="spinner"></span>${message}` : message;
+      }
+
+      // Execute search
+      async function executeSearch() {
+        try {
+          // Disable form
+          submitBtn.disabled = true;
+          downloadBtn.disabled = true;
+          resultsPanel.style.display = 'none';
+          currentResponse = null;
+          btnText.innerHTML = '<span class="spinner"></span>A processar...';
+
+          showStatus('🔍 A pesquisar anúncios...', 'loading');
+
+          // Clear and show logs
+          clearLogs();
+          showLogs();
+          addLog('🚀 Iniciando pesquisa de anúncios...', 'info');
+
+          // Build request
+          const requestBody = {};
+
+          addLog('📝 A preparar parâmetros de pesquisa...', 'info');
+
+          if (searchDateInput.value) {
+            requestBody.date = searchDateInput.value;
+            addLog(`📅 Data: ${searchDateInput.value}`, 'info');
+          } else {
+            addLog('📅 Data: ontem (padrão)', 'info');
+          }
+
+          if (maxResultsInput.value) {
+            requestBody.maxResults = parseInt(maxResultsInput.value);
+            addLog(`🔢 Limite máximo: ${maxResultsInput.value} anúncios`, 'info');
+          }
+
+          if (selectedCpvs.size > 0) {
+            requestBody.cpvCodes = Array.from(selectedCpvs);
+            addLog(`🏷️ CPVs selecionados: ${selectedCpvs.size}`, 'info');
+          } else {
+            addLog('🏷️ A usar todos os CPVs disponíveis', 'info');
+          }
+
+          requestBody.sendEmail = sendEmailEnabled;
+          if (sendEmailEnabled) {
+            addLog('✉️ Envio de email: ATIVADO', 'warning');
+          } else {
+            addLog('✉️ Envio de email: desativado', 'info');
+          }
+
+          addLog('🌐 A enviar requisição para a API...', 'info');
+
+          // Make request
+          const response = await fetch(`${apiUrlInput.value}/api/contracts/search`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+            addLog(`❌ Erro na resposta: ${data.error || 'Erro desconhecido'}`, 'error');
+            throw new Error(data.error || 'Erro desconhecido');
+          }
+
+          addLog('✅ Resposta recebida com sucesso', 'success');
+          addLog(`📊 Total de contratos encontrados: ${data.totalContracts}`, 'success');
+
+          if (data.cpvCodes && data.cpvCodes.length > 0) {
+            addLog(`🏷️ CPVs únicos encontrados: ${data.cpvCodes.length}`, 'info');
+          }
+
+          if (data.excelUrl) {
+            addLog(`📄 Ficheiro Excel gerado: ${data.excelFilename}`, 'success');
+          }
+
+          // Store response
+          currentResponse = data;
+
+          // Show results
+          showStatus(`✅ Pesquisa concluída! Encontrados ${data.totalContracts} contratos.`, 'success');
+          displayResults(data);
+
+          // Enable download button
+          downloadBtn.disabled = false;
+          addLog('✅ Pesquisa concluída com sucesso!', 'success');
+        } catch (error) {
+          console.error('Erro na pesquisa:', error);
+          addLog(`❌ Erro: ${error.message}`, 'error');
+          showStatus(`❌ Erro: ${error.message}`, 'error');
+        } finally {
+          submitBtn.disabled = false;
+          btnText.textContent = '🚀 Executar Pesquisa';
+        }
+      }
+
+      // Display results
+      function displayResults(data) {
+        resultsPanel.style.display = 'block';
+
+        // Summary
+        summaryGrid.innerHTML = `
+          <div class="summary-card">
+            <div class="label">Total de Contratos</div>
+            <div class="value">${data.totalContracts}</div>
+          </div>
+          <div class="summary-card">
+            <div class="label">Data</div>
+            <div class="value">${data.date}</div>
+          </div>
+          <div class="summary-card">
+            <div class="label">CPVs Encontrados</div>
+            <div class="value">${data.cpvCodes.length}</div>
+          </div>
+          <div class="summary-card">
+            <div class="label">Máx. Resultados</div>
+            <div class="value">${data.maxResults || 'Sem limite'}</div>
+          </div>
+        `;
+
+        // Contracts list
+        if (data.contracts && data.contracts.length > 0) {
+          contractsList.innerHTML = data.contracts
+            .map(
+              (contract) => `
+            <div class="contract-item">
+              <div class="contract-header">
+                <div class="contract-title">${contract.title}</div>
+                <div class="contract-cpv">${contract.cpv}</div>
+              </div>
+              <div class="contract-meta">
+                <div class="contract-meta-item">
+                  <span class="label">Emissor:</span>
+                  <span class="value">${contract.entity}</span>
+                </div>
+                <div class="contract-meta-item">
+                  <span class="label">Publicação:</span>
+                  <span class="value">${contract.publicacao}</span>
+                </div>
+                <div class="contract-meta-item">
+                  <span class="label">Data:</span>
+                  <span class="value">${contract.contractDate}</span>
+                </div>
+                <div class="contract-meta-item">
+                  <span class="label">Valor:</span>
+                  <span class="value">${contract.contractValue || 'N/A'}</span>
+                </div>
+              </div>
+              <a href="${contract.url}" target="_blank" class="contract-link">
+                🔗 Ver anúncio completo →
+              </a>
+            </div>
+          `
+            )
+            .join('');
+        } else {
+          contractsList.innerHTML = `
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <div>Nenhum contrato encontrado para os critérios selecionados.</div>
+            </div>
+          `;
+        }
+
+        // JSON
+        jsonContent.textContent = JSON.stringify(data, null, 2);
+      }
+
+      // Download Excel
+      function downloadExcel() {
+        if (!currentResponse || !currentResponse.report) {
+          return;
+        }
+
+        try {
+          const { base64, filename, mimeType } = currentResponse.report;
+
+          // Convert base64 to blob
+          const byteCharacters = atob(base64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: mimeType });
+
+          // Download
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+
+          showStatus('✅ Excel descarregado com sucesso!', 'success');
+        } catch (error) {
+          console.error('Erro ao descarregar Excel:', error);
+          showStatus('❌ Erro ao descarregar Excel', 'error');
+        }
+      }
+
+      // Initialize on load
+      init();
+    </script>
+  </body>
+</html>
